@@ -577,6 +577,7 @@ class ItemService:
         item.status = projected.value
         item.completed_at = None
         item.updated_at = now
+        reminder_service.update_pending_for_item(db, item=item)
         event_service.record(
             db,
             event_type=EventType.ITEM_REOPENED,
