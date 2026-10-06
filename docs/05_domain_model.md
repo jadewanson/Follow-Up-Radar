@@ -14,6 +14,7 @@ This document describes the current iteration-14 model. Later iteration notes ma
 - `paid` is not a lifecycle state and does not close a case.
 - PostgreSQL-backed models are authoritative for persisted domain state.
 - Web and extension clients do not own domain state.
+- One-time authentication secrets are never persisted in notification message bodies.
 
 ## 2. Entities
 
@@ -38,6 +39,8 @@ Fields:
 - `expires_at`
 - `consumed_at`
 - `created_at`
+
+The raw token exists only long enough to construct and deliver the sign-in message. Only its keyed hash is persisted.
 
 ### UserSession
 One authenticated bearer session.
@@ -113,6 +116,8 @@ Fields:
 - `sent_at`
 - `created_at`
 - `updated_at`
+
+For ordinary reminder and digest messages, `body_text` is the durable retry payload. For a magic-link message it contains only a redacted audit marker. The one-time login URL/token is supplied directly to the configured gateway and is not recoverable from this table.
 
 ### Subscription
 Current internal-beta subscription state. It does **not** represent a real charged payment-provider subscription yet.

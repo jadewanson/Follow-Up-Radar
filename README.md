@@ -21,7 +21,7 @@ Work is tracked in GitHub Issues; see [the issue workflow](docs/WORK_TRACKING.md
 | `infra/` | Infrastructure notes |
 | `compose.yaml` | Local PostgreSQL and Redis |
 
-The backend and PostgreSQL own domain state. The web app and extension are clients; neither is a source of truth. Email delivery defaults to a local file outbox during development.
+The backend and PostgreSQL own domain state. The web app and extension are clients; neither is a source of truth. Email delivery defaults to a local file outbox during development and supports a real SMTP relay for deployed environments.
 
 ## Local setup
 
@@ -42,10 +42,29 @@ Prerequisites: **Python 3.13**, **Node.js**, and **Docker Compose**.
    ```
 
 4. In another terminal, run `cd web && npm ci && npm run dev`; open `http://localhost:5173`.
-5. Check `http://localhost:8000/health/live` and `http://localhost:8000/health/ready`. Development magic links are written to `var/dev_email_outbox`; open the link from that file or paste its token into the web app. Development mode does not send email.
+5. Check `http://localhost:8000/health/live` and `http://localhost:8000/health/ready`. Development magic links are written to `var/dev_email_outbox`; open the link from that file or paste its token into the web app.
 
 To run backend tests after setup: `cd backend && pytest`. The extension is loaded as an unpacked extension from `extension/` in Chrome; see its README for its limited role.
 
+## Real email delivery
+
+Set `EMAIL_DELIVERY_MODE=smtp` in `backend/.env` and provide an SMTP relay:
+
+```dotenv
+EMAIL_DELIVERY_MODE=smtp
+EMAIL_FROM_ADDRESS=radar@example.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURITY=starttls
+SMTP_USERNAME=replace-with-smtp-username
+SMTP_PASSWORD=replace-with-smtp-password
+SMTP_TIMEOUT_SECONDS=10
+```
+
+`SMTP_SECURITY` supports `starttls`, `ssl`, and `none`. Use `starttls` or `ssl` for deployed systems; unencrypted SMTP is rejected in staging and production. SMTP authentication is optional for relays that do not require it, but username and password must either both be present or both be absent.
+
+The same delivery boundary sends sign-in magic links, reminders, and daily digests. One-time magic-link secrets are sent to the recipient but are not persisted in `notification_deliveries.body_text`; only a redacted audit marker is stored there.
+
 ## Safety and limitations
 
-Never commit `.env` files, database data, dumps, mail outbox files, or generated caches. The tracked examples contain placeholders only. Before deploying, set unique credentials, configure real email delivery, and complete the operational checks in `docs/13_deployment_runbook_and_operations.md`.
+Never commit `.env` files, database data, dumps, mail outbox files, or generated caches. The tracked examples contain placeholders only. Production SMTP credentials belong only in deployment secrets. Before deploying, complete the operational checks in `docs/13_deployment_runbook_and_operations.md`.

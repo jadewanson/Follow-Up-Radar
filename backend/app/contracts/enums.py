@@ -12,6 +12,13 @@ class AppEnv(str, Enum):
 
 class EmailDeliveryMode(str, Enum):
     DEV_FILE = "dev_file"
+    SMTP = "smtp"
+
+
+class SmtpSecurity(str, Enum):
+    STARTTLS = "starttls"
+    SSL = "ssl"
+    NONE = "none"
 
 
 class Plan(str, Enum):

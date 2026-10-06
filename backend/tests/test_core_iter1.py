@@ -62,7 +62,19 @@ def test_auth_item_reminder_event_flow() -> None:
     assert len(outbox_lines) == 1
     delivery_payload = json.loads(outbox_lines[0])
     assert delivery_payload["kind"] == "magic_link_email"
+    assert delivery_payload["from_email"] == "noreply@followupradar.local"
     assert delivery_payload["to_email"] == email
+    assert "#/verify?" in delivery_payload["body_text"]
+
+    with SessionLocal() as db:
+        magic_delivery = db.execute(
+            select(NotificationDelivery).where(
+                NotificationDelivery.kind == "magic_link_email"
+            )
+        ).scalar_one()
+        assert "#/verify?" not in magic_delivery.body_text
+        assert "token=" not in magic_delivery.body_text
+        assert "one-time authentication secret" in magic_delivery.body_text
 
     raw_token = _consume_magic_token(email)
     verify = client.post("/auth/verify", json={"email": email, "token": raw_token})
@@ -92,7 +104,9 @@ def test_auth_item_reminder_event_flow() -> None:
     assert len(board.json()["overdue"]) == 1
 
     with SessionLocal() as db:
-        reminder = db.execute(select(Reminder).where(Reminder.item_id == UUID(item_id))).scalar_one_or_none()
+        reminder = db.execute(
+            select(Reminder).where(Reminder.item_id == UUID(item_id))
+        ).scalar_one_or_none()
         assert reminder is not None
         events = db.execute(select(EventLog)).scalars().all()
         event_types = {event.event_type for event in events}

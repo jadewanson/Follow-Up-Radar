@@ -20,11 +20,19 @@ os.environ["DEV_EMAIL_OUTBOX_PATH"] = str(TEST_OUTBOX_FILE)
 os.environ["CORS_ALLOWED_ORIGINS"] = "http://localhost:5173"
 
 from app.config import _parse_int
-from app.contracts.enums import NotificationDeliveryKind, NotificationDeliveryStatus
+from app.contracts.enums import (
+    NotificationDeliveryKind,
+    NotificationDeliveryStatus,
+    SmtpSecurity,
+)
 from app.contracts.errors import ConfigurationError
 from app.models.notification_delivery import NotificationDelivery
 from app.schemas.followup_item import FollowUpItemCreate
-from app.services.notification_delivery_service import notification_delivery_service
+from app.services.notification_delivery_service import (
+    EmailMessage,
+    SmtpEmailGateway,
+    notification_delivery_service,
+)
 
 
 def test_digest_hour_accepts_midnight(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -62,6 +70,81 @@ def test_failed_notification_delivery_can_retry(monkeypatch: pytest.MonkeyPatch)
     assert delivery.attempt_count == 2
     assert delivery.provider_message_id == "provider-message-1"
     assert delivery.error_text is None
+
+
+def test_smtp_gateway_uses_starttls_auth_and_from_address(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clients: list[FakeSmtp] = []
+
+    class FakeSmtp:
+        def __init__(self, host: str, port: int, timeout: int) -> None:
+            self.host = host
+            self.port = port
+            self.timeout = timeout
+            self.ehlo_count = 0
+            self.started_tls = False
+            self.login_args: tuple[str, str] | None = None
+            self.sent_message = None
+            clients.append(self)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args) -> None:
+            return None
+
+        def ehlo(self) -> None:
+            self.ehlo_count += 1
+
+        def starttls(self, *, context) -> None:
+            assert context is not None
+            self.started_tls = True
+
+        def login(self, username: str, password: str) -> None:
+            self.login_args = (username, password)
+
+        def send_message(self, message):
+            self.sent_message = message
+            return {}
+
+    monkeypatch.setattr(
+        "app.services.notification_delivery_service.smtplib.SMTP",
+        FakeSmtp,
+    )
+    gateway = SmtpEmailGateway(
+        host="smtp.example.com",
+        port=587,
+        username="smtp-user",
+        password="smtp-password",
+        security=SmtpSecurity.STARTTLS,
+        timeout_seconds=10,
+        from_address="radar@example.com",
+    )
+    message = EmailMessage(
+        kind=NotificationDeliveryKind.REMINDER_EMAIL,
+        idempotency_key="reminder:1",
+        to_email="user@example.com",
+        subject="Follow up",
+        body_text="Reminder body",
+        related_entity_type="reminder",
+        related_entity_id="1",
+        user_id=None,
+    )
+
+    provider_message_id = gateway.send(message)
+
+    client = clients[0]
+    assert client.host == "smtp.example.com"
+    assert client.port == 587
+    assert client.timeout == 10
+    assert client.started_tls is True
+    assert client.ehlo_count == 2
+    assert client.login_args == ("smtp-user", "smtp-password")
+    assert client.sent_message["From"] == "radar@example.com"
+    assert client.sent_message["To"] == "user@example.com"
+    assert client.sent_message["X-Follow-Up-Radar-Idempotency-Key"] == "reminder:1"
+    assert provider_message_id
 
 
 def test_source_url_rejects_non_http_schemes() -> None:

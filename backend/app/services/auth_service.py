@@ -19,6 +19,10 @@ from app.services.notification_delivery_service import EmailMessage, notificatio
 from app.utils.datetime import coerce_utc, utcnow
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+MAGIC_LINK_PERSISTED_BODY = (
+    "Magic-link content is intentionally not persisted because it contains "
+    "a one-time authentication secret."
+)
 
 
 class AuthService:
@@ -67,7 +71,8 @@ class AuthService:
         )
 
         verify_url = (
-            f"{self.settings.app_base_url.rstrip('/')}/#/verify?email={quote(normalized)}&token={quote(raw_token)}"
+            f"{self.settings.app_base_url.rstrip('/')}/#/verify"
+            f"?email={quote(normalized)}&token={quote(raw_token)}"
         )
         body = (
             "Your Follow-Up Radar sign-in link\n\n"
@@ -94,8 +99,12 @@ class AuthService:
             db,
             message=message,
             provider_name=self.settings.email_delivery_mode.value,
+            persisted_body_text=MAGIC_LINK_PERSISTED_BODY,
         )
-        notification_delivery_service.dispatch_delivery(delivery=delivery)
+        notification_delivery_service.dispatch_message(
+            delivery=delivery,
+            message=message,
+        )
         if delivery.status != "sent":
             db.rollback()
             raise AuthenticationError("Magic link could not be delivered")

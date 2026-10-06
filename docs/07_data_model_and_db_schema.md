@@ -12,6 +12,7 @@
 - Nullability and delete behavior are deliberate.
 - Allowed enum-like values live in backend contracts and are validated by service/API boundaries.
 - Tests may use SQLite as a fast service-level substitute, but SQLite success does not replace the PostgreSQL migration gate.
+- Raw magic-link secrets must never be stored in database delivery payloads.
 
 ## 2. Current tables
 
@@ -66,6 +67,8 @@ Alembic head currently contains:
 - kind
 - idempotency key
 - status
+
+For reminder and digest deliveries, `body_text` is a retry payload. Magic-link deliveries persist a redacted marker instead of the one-time URL/token.
 
 ### subscriptions
 - user
