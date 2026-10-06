@@ -1,0 +1,41 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Data, dumps, and development mail
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+*.dump
+*.bak
+var/*
+!var/.gitkeep
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node and build artifacts
+node_modules/
+dist/
+build/
+coverage/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

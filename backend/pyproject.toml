@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "followup-radar-backend"
+version = "0.1.0"
+description = "Authoritative backend for Follow-Up Radar"
+requires-python = ">=3.13"
+dependencies = [
+  "fastapi>=0.115,<0.116",
+  "uvicorn[standard]>=0.34,<0.35",
+  "sqlalchemy>=2.0,<2.1",
+  "alembic>=1.16,<1.17",
+  "psycopg[binary]>=3.2,<3.3",
+  "redis>=6.0,<6.1",
+  "pydantic>=2.11,<2.12",
+  "pydantic-settings>=2.8,<2.9",
+  "python-dotenv>=1.0,<1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<8.4",
+  "pytest-asyncio>=0.26,<0.27",
+  "httpx>=0.28,<0.29",
+  "ruff>=0.11,<0.12",
+  "mypy>=1.15,<1.16",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "RUF"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

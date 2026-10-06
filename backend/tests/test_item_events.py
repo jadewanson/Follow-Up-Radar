@@ -1,0 +1,103 @@
+from __future__ import annotations
+
+import os
+import tempfile
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+TEST_DB_FILE = Path(tempfile.gettempdir()) / "followup_radar_test.sqlite3"
+TEST_OUTBOX_FILE = Path(tempfile.gettempdir()) / "followup_radar_test_outbox.jsonl"
+os.environ["APP_ENV"] = "test"
+os.environ["APP_SECRET_KEY"] = "test-secret-key"
+os.environ["APP_BASE_URL"] = "http://localhost:5173"
+os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB_FILE}"
+os.environ["REDIS_URL"] = "redis://localhost:6379/0"
+os.environ["EMAIL_DELIVERY_MODE"] = "dev_file"
+os.environ["EMAIL_FROM_ADDRESS"] = "noreply@followupradar.local"
+os.environ["DEV_EMAIL_OUTBOX_PATH"] = str(TEST_OUTBOX_FILE)
+os.environ["CORS_ALLOWED_ORIGINS"] = "http://localhost:5173"
+
+from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from app.db.base import Base
+from app.db.session import SessionLocal, engine
+from app.main import app
+from app.models.auth_token import MagicLinkToken
+
+
+def _reset_db() -> None:
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    TEST_OUTBOX_FILE.unlink(missing_ok=True)
+
+
+def _consume_magic_token(email: str) -> str:
+    with SessionLocal() as db:
+        row = db.execute(select(MagicLinkToken).where(MagicLinkToken.email == email)).scalar_one()
+        raw = (email.replace("@", "_").replace(".", "_") + "_TOKEN_" * 8)[:48]
+        from app.services.auth_service import auth_service
+
+        row.token_hash = auth_service._hash_token(raw)  # noqa: SLF001
+        db.commit()
+        return raw
+
+
+def _login(client: TestClient, email: str) -> str:
+    req = client.post("/auth/request-magic-link", json={"email": email})
+    assert req.status_code == 202, req.text
+    token = _consume_magic_token(email)
+    verify = client.post("/auth/verify", json={"email": email, "token": token})
+    assert verify.status_code == 200, verify.text
+    return verify.json()["access_token"]
+
+
+def test_item_events_endpoint_returns_item_activity_only() -> None:
+    _reset_db()
+    client = TestClient(app)
+
+    user_token = _login(client, "owner@example.com")
+    other_token = _login(client, "other@example.com")
+
+    due_at = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    create = client.post(
+        "/items",
+        headers={"Authorization": f"Bearer {user_token}"},
+        json={
+            "title": "Follow up invoice 1024",
+            "client_name": "Client A",
+            "type": "invoice",
+            "due_at": due_at,
+            "amount": "250.00",
+            "currency": "usd",
+            "note": "Sent yesterday",
+        },
+    )
+    assert create.status_code == 201, create.text
+    item_id = create.json()["id"]
+
+    paid = client.post(
+        f"/items/{item_id}/mark-paid",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+    assert paid.status_code == 200, paid.text
+
+    complete = client.post(
+        f"/items/{item_id}/complete",
+        headers={"Authorization": f"Bearer {user_token}"},
+        json={"outcome": "done", "reason": "Paid and delivered"},
+    )
+    assert complete.status_code == 200, complete.text
+
+    events = client.get(f"/items/{item_id}/events", headers={"Authorization": f"Bearer {user_token}"})
+    assert events.status_code == 200, events.text
+    payload = events.json()
+    assert payload[0]["event_type"] == "item_status_changed"
+    assert payload[0]["summary"] == "Case status changed to done — Paid and delivered"
+    event_types = [row["event_type"] for row in payload]
+    assert "item_payment_status_changed" in event_types
+    payment_row = next(row for row in payload if row["event_type"] == "item_payment_status_changed")
+    assert payment_row["summary"] == "Payment status changed to paid"
+
+    forbidden = client.get(f"/items/{item_id}/events", headers={"Authorization": f"Bearer {other_token}"})
+    assert forbidden.status_code == 404, forbidden.text

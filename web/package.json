@@ -1,0 +1,12 @@
+{
+  "name": "followup-radar-web",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "start": "node dev-server.mjs",
+    "build": "node -e \"console.log('static web app: no build step required')\"",
+    "lint": "node -e \"console.log('lint not configured for static web app yet')\""
+  }
+}

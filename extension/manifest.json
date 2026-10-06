@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Follow-Up Radar",
+  "description": "Thin capture layer for follow-up creation.",
+  "version": "0.1.0",
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "permissions": ["tabs"],
+  "host_permissions": [],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
