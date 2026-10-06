@@ -34,15 +34,15 @@ class FollowUpItemCreate(BaseModel):
     type: ItemType
     source_url: str | None = None
     note: str | None = None
+    next_action: str | None = Field(default=None, max_length=1000)
+    amount: Decimal | None = None
+    currency: str | None = Field(default=None, min_length=3, max_length=8)
+    due_at: datetime
 
     @field_validator("source_url")
     @classmethod
     def validate_source_url(cls, value: str | None) -> str | None:
         return _normalize_source_url(value)
-    next_action: str | None = Field(default=None, max_length=1000)
-    amount: Decimal | None = None
-    currency: str | None = Field(default=None, min_length=3, max_length=8)
-    due_at: datetime
 
 
 class FollowUpItemUpdate(BaseModel):
@@ -51,14 +51,14 @@ class FollowUpItemUpdate(BaseModel):
     type: ItemType | None = None
     source_url: str | None = None
     note: str | None = None
+    next_action: str | None = Field(default=None, max_length=1000)
+    amount: Decimal | None = None
+    currency: str | None = Field(default=None, min_length=3, max_length=8)
 
     @field_validator("source_url")
     @classmethod
     def validate_source_url(cls, value: str | None) -> str | None:
         return _normalize_source_url(value)
-    next_action: str | None = Field(default=None, max_length=1000)
-    amount: Decimal | None = None
-    currency: str | None = Field(default=None, min_length=3, max_length=8)
 
 
 class FollowUpItemRescheduleRequest(BaseModel):
