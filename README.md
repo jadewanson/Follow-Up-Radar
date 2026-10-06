@@ -27,7 +27,7 @@ The backend and PostgreSQL own domain state. The web app and extension are clien
 
 Prerequisites: **Python 3.13**, **Node.js**, and **Docker Compose**.
 
-1. Copy `.env.example` to `.env` and set a local PostgreSQL password. Copy `backend/.env.example` to `backend/.env`. Set the same database password in `DATABASE_URL` and replace `APP_SECRET_KEY` with a newly generated local secret. Both `.env` files are ignored by Git.
+1. Copy `.env.example` to `.env` and set a local PostgreSQL password. Copy `backend/.env.example` to `backend/.env`. Set the same database password in `DATABASE_URL` and replace `APP_SECRET_KEY` with a newly generated local secret. Keep `APP_BASE_URL=http://localhost:5173`: magic links must open the web app, not the API. Both `.env` files are ignored by Git.
 2. From the repository root, start the local services: `docker compose up -d postgres redis`.
 3. In `backend/`, create and activate a virtual environment, install dependencies, load the environment, run migrations, and start the API:
 
@@ -42,7 +42,7 @@ Prerequisites: **Python 3.13**, **Node.js**, and **Docker Compose**.
    ```
 
 4. In another terminal, run `cd web && npm ci && npm run dev`; open `http://localhost:5173`.
-5. Check `http://localhost:8000/health/live` and `http://localhost:8000/health/ready`. Development magic links are written to `var/dev_email_outbox`.
+5. Check `http://localhost:8000/health/live` and `http://localhost:8000/health/ready`. Development magic links are written to `var/dev_email_outbox`; open the link from that file or paste its token into the web app. Development mode does not send email.
 
 To run backend tests after setup: `cd backend && pytest`. The extension is loaded as an unpacked extension from `extension/` in Chrome; see its README for its limited role.
 
