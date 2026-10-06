@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from redis import Redis
 from sqlalchemy import text
@@ -21,6 +23,8 @@ from app.services.activation_service import activation_service
 from app.services.beta_interest_service import beta_interest_service
 from app.services.item_service import item_service
 
+logger = logging.getLogger(__name__)
+
 health_router = APIRouter(tags=["health"])
 system_router = APIRouter()
 
@@ -37,9 +41,10 @@ def ready() -> dict[str, str]:
         with SessionLocal() as session:
             session.execute(text("SELECT 1"))
     except SQLAlchemyError as exc:
+        logger.exception("Database readiness check failed")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"reason": "database_not_ready", "error": str(exc)},
+            detail={"reason": "database_not_ready"},
         ) from exc
 
     try:
@@ -47,9 +52,10 @@ def ready() -> dict[str, str]:
         if redis_client.ping() is not True:
             raise RuntimeError("redis ping did not return True")
     except Exception as exc:  # noqa: BLE001
+        logger.exception("Redis readiness check failed")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"reason": "redis_not_ready", "error": str(exc)},
+            detail={"reason": "redis_not_ready"},
         ) from exc
 
     return {"status": "ready"}
