@@ -89,8 +89,13 @@ class NotificationDeliveryService:
         return delivery
 
     def dispatch_delivery(self, *, delivery: NotificationDelivery) -> bool:
-        if delivery.status != NotificationDeliveryStatus.PENDING.value:
-            return delivery.status == NotificationDeliveryStatus.SENT.value
+        if delivery.status == NotificationDeliveryStatus.SENT.value:
+            return True
+        if delivery.status not in {
+            NotificationDeliveryStatus.PENDING.value,
+            NotificationDeliveryStatus.FAILED.value,
+        }:
+            return False
         now = utcnow()
         message = EmailMessage(
             kind=NotificationDeliveryKind(delivery.kind),
@@ -114,6 +119,7 @@ class NotificationDeliveryService:
         delivery.attempt_count += 1
         delivery.provider_message_id = provider_message_id
         delivery.status = NotificationDeliveryStatus.SENT.value
+        delivery.error_text = None
         delivery.sent_at = now
         delivery.updated_at = now
         return True
