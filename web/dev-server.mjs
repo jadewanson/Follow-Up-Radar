@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { extname, join, resolve } from 'node:path';
+import { extname, join, resolve, sep } from 'node:path';
 
 const root = resolve('.');
 const mime = {
@@ -12,9 +12,14 @@ const mime = {
 
 const server = createServer(async (req, res) => {
   try {
-    const urlPath = req.url === '/' ? '/index.html' : req.url.split('?')[0];
-    const safePath = urlPath === '/' ? '/index.html' : urlPath;
-    const filePath = join(root, safePath);
+    const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+    const requestedPath = urlPath === '/' ? '/index.html' : urlPath;
+    const filePath = resolve(root, `.${requestedPath}`);
+    if (!filePath.startsWith(`${root}${sep}`)) {
+      res.writeHead(403, { 'content-type': 'text/plain; charset=utf-8' });
+      res.end('Forbidden');
+      return;
+    }
     const body = await readFile(filePath);
     res.writeHead(200, { 'content-type': mime[extname(filePath)] || 'text/plain; charset=utf-8' });
     res.end(body);
