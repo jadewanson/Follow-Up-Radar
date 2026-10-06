@@ -8,6 +8,8 @@ This repository restores the **iteration 14 development snapshot**. It includes 
 
 See [the restoration notes](docs/RESTORATION.md) for source and exclusions. The product scope and domain rules live in [the documentation index](docs/00_README.md).
 
+Work is tracked in GitHub Issues; see [the issue workflow](docs/WORK_TRACKING.md).
+
 ## Repository map
 
 | Path | Responsibility |

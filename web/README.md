@@ -1,27 +1,9 @@
-# Follow-Up Radar web control surface
+# Web interface
 
-This is a static, no-build control surface for iteration 02.
+The static browser client for the iteration 14 development snapshot. It covers sign-in by magic link, case capture and review, filters and follow-up actions, activation, beta interest, and internal beta billing controls. Domain state remains in the backend.
 
 ## Start
 
-```bash
-npm run dev
-```
+From `web/`, run `npm ci && npm run dev`, then open `http://localhost:5173`. The API must be running at `http://localhost:8000`; follow the root README for database, Redis, and backend setup.
 
-The server runs at `http://localhost:5173`.
-The backend must be running at `http://localhost:8000`.
-
-## Current scope
-- request magic link
-- verify token
-- dashboard board view
-- create item
-- item detail
-- reschedule
-- complete outcome
-
-## Non-goals
-- polished design system
-- billing UI
-- extension integration
-- rich analytics
+The development server serves files from `web/` and falls back to `index.html` for app routes. It is intended for local use only. There is no production build pipeline or configured frontend lint task yet.
