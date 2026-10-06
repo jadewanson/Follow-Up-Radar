@@ -4,6 +4,7 @@ import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from uuid import UUID
 
 TEST_DB_FILE = Path(tempfile.gettempdir()) / "followup_radar_test.sqlite3"
 TEST_OUTBOX_FILE = Path(tempfile.gettempdir()) / "followup_radar_test_outbox.jsonl"
@@ -102,7 +103,7 @@ def test_terminal_reasons_required_and_case_can_reopen() -> None:
 
     with SessionLocal() as db:
         reminders = db.execute(
-            select(Reminder).where(Reminder.item_id == item_id).order_by(Reminder.created_at.asc())
+            select(Reminder).where(Reminder.item_id == UUID(item_id)).order_by(Reminder.created_at.asc())
         ).scalars().all()
         assert [reminder.status for reminder in reminders] == ["canceled", "pending"]
 
