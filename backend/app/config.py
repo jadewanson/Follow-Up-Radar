@@ -15,18 +15,28 @@ def _require_env(name: str) -> str:
     return value.strip()
 
 
-def _parse_int(name: str, default: int | None = None) -> int:
+def _parse_int(
+    name: str,
+    default: int | None = None,
+    *,
+    minimum: int = 1,
+    maximum: int | None = None,
+) -> int:
     raw = os.getenv(name)
     if raw is None:
         if default is None:
             raise ConfigurationError(f"Missing required integer environment variable: {name}")
-        return default
-    try:
-        value = int(raw)
-    except ValueError as exc:
-        raise ConfigurationError(f"Environment variable {name} must be an integer") from exc
-    if value <= 0:
-        raise ConfigurationError(f"Environment variable {name} must be > 0")
+        value = default
+    else:
+        try:
+            value = int(raw)
+        except ValueError as exc:
+            raise ConfigurationError(f"Environment variable {name} must be an integer") from exc
+
+    if value < minimum:
+        raise ConfigurationError(f"Environment variable {name} must be >= {minimum}")
+    if maximum is not None and value > maximum:
+        raise ConfigurationError(f"Environment variable {name} must be <= {maximum}")
     return value
 
 
@@ -87,9 +97,12 @@ class Settings:
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    daily_digest_hour_utc = _parse_int("DAILY_DIGEST_HOUR_UTC", default=7)
-    if daily_digest_hour_utc < 0 or daily_digest_hour_utc > 23:
-        raise ConfigurationError("Environment variable DAILY_DIGEST_HOUR_UTC must be between 0 and 23")
+    daily_digest_hour_utc = _parse_int(
+        "DAILY_DIGEST_HOUR_UTC",
+        default=7,
+        minimum=0,
+        maximum=23,
+    )
 
     email_delivery_mode = _parse_email_delivery_mode("EMAIL_DELIVERY_MODE", default=EmailDeliveryMode.DEV_FILE)
     dev_email_outbox_path = _require_env("DEV_EMAIL_OUTBOX_PATH") if email_delivery_mode == EmailDeliveryMode.DEV_FILE else ""
