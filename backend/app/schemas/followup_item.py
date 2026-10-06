@@ -2,11 +2,24 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
+from urllib.parse import urlsplit
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.contracts.enums import ItemStatus, ItemType, PaymentStatus, ReminderStatus
+
+
+def _normalize_source_url(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    if not normalized:
+        return None
+    parsed = urlsplit(normalized)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError("source_url must be an absolute http(s) URL")
+    return normalized
 
 
 class ReviewSignalRead(BaseModel):
@@ -21,6 +34,11 @@ class FollowUpItemCreate(BaseModel):
     type: ItemType
     source_url: str | None = None
     note: str | None = None
+
+    @field_validator("source_url")
+    @classmethod
+    def validate_source_url(cls, value: str | None) -> str | None:
+        return _normalize_source_url(value)
     next_action: str | None = Field(default=None, max_length=1000)
     amount: Decimal | None = None
     currency: str | None = Field(default=None, min_length=3, max_length=8)
@@ -33,6 +51,11 @@ class FollowUpItemUpdate(BaseModel):
     type: ItemType | None = None
     source_url: str | None = None
     note: str | None = None
+
+    @field_validator("source_url")
+    @classmethod
+    def validate_source_url(cls, value: str | None) -> str | None:
+        return _normalize_source_url(value)
     next_action: str | None = Field(default=None, max_length=1000)
     amount: Decimal | None = None
     currency: str | None = Field(default=None, min_length=3, max_length=8)
