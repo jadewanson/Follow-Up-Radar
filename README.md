@@ -4,7 +4,7 @@ Follow-Up Radar helps independent service providers and small studios keep track
 
 ## Status
 
-This repository restores the **iteration 14 development snapshot**. It includes the API, a static web interface, a Chrome MV3 capture extension, migrations, tests, and product/engineering documentation. It is a development baseline, **not a production release**. Billing is an internal beta state flow; it does not charge cards or integrate a payment provider. End-to-end startup and database tests still need verification on a machine with Docker.
+This repository restores the **iteration 14 development snapshot**. It includes the API, a static web interface, a Chrome MV3 capture extension, migrations, tests, and product/engineering documentation. It is a development baseline, **not a production release**. Billing is an internal beta state flow; it does not charge cards or integrate a payment provider.
 
 See [the restoration notes](docs/RESTORATION.md) for source and exclusions. The product scope and domain rules live in [the documentation index](docs/00_README.md).
 
@@ -19,16 +19,33 @@ Work is tracked in GitHub Issues; see [the issue workflow](docs/WORK_TRACKING.md
 | `extension/` | Chrome MV3 capture client |
 | `docs/` | Product scope, contracts, architecture, runbooks, iteration notes |
 | `infra/` | Infrastructure notes |
-| `compose.yaml` | Local PostgreSQL and Redis |
+| `compose.yaml` | One-command local stack: PostgreSQL, Redis, API, and web |
 
 The backend and PostgreSQL own domain state. The web app and extension are clients; neither is a source of truth. Email delivery defaults to a local file outbox during development and supports a real SMTP relay for deployed environments.
 
-## Local setup
+## Run the whole app with Docker Compose
 
-Prerequisites: **Python 3.13**, **Node.js**, and **Docker Compose**.
+Prerequisite: **Docker Desktop with Compose**. Run these commands from this repository's root, not from a different local copy.
 
-1. Copy `.env.example` to `.env` and set a local PostgreSQL password. Copy `backend/.env.example` to `backend/.env`. Set the same database password in `DATABASE_URL` and replace `APP_SECRET_KEY` with a newly generated local secret. Keep `APP_BASE_URL=http://localhost:5173`: magic links must open the web app, not the API. Both `.env` files are ignored by Git.
-2. From the repository root, start the local services: `docker compose up -d postgres redis`.
+1. Copy `.env.example` to `.env` and `backend/.env.example` to `backend/.env`. Replace the sample PostgreSQL password in both `POSTGRES_PASSWORD` and `DATABASE_URL_DOCKER` in the root `.env`; they must refer to the same password. If you already have a PostgreSQL volume, use its existing password: changing the Compose variable does not reset the database password. Set a unique `APP_SECRET_KEY` in `backend/.env`. Both `.env` files are ignored by Git.
+2. Start all four services and build the API/web images:
+
+   ```sh
+   docker compose up -d --build
+   docker compose ps
+   ```
+
+3. Open `http://localhost:5173`. Check API readiness at `http://localhost:8000/health/ready`. If startup fails, read `docker compose logs -f api web`.
+4. In development mode, sign-in links are written to `var/dev_email_outbox` on your Mac. Open the newest link there; email is not sent unless SMTP is configured.
+
+Compose waits for PostgreSQL and Redis to become healthy before starting the API. The API applies Alembic migrations before serving requests. Inside Compose, it reaches the database at `postgres` and Redis at `redis`; `localhost` inside a container means that container itself. `docker compose down` stops the stack while keeping the PostgreSQL volume; do not add `-v` if you need the existing data.
+
+## Run API and web on the host instead
+
+Prerequisites: **Python 3.13**, **Node.js**, and **Docker Compose**. Use this route when editing the app outside containers.
+
+1. Prepare both `.env` files as above. In `backend/.env`, set `DATABASE_URL` to the host address `127.0.0.1:5432`, with the same database password, and keep `APP_BASE_URL=http://localhost:5173`.
+2. Start only the data services: `docker compose up -d postgres redis`.
 3. In `backend/`, create and activate a virtual environment, install dependencies, load the environment, run migrations, and start the API:
 
    ```sh
