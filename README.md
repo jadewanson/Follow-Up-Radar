@@ -40,6 +40,8 @@ Prerequisite: **Docker Desktop with Compose**. Run these commands from this repo
 
 Compose waits for PostgreSQL and Redis to become healthy before starting the API. The API applies Alembic migrations before serving requests. Inside Compose, it reaches the database at `postgres` and Redis at `redis`; `localhost` inside a container means that container itself. `docker compose down` stops the stack while keeping the PostgreSQL volume; do not add `-v` if you need the existing data.
 
+If an older checkout already runs `followup-postgres` and `followup-redis`, update that checkout or stop its Compose stack from its own directory before starting another copy. A different Compose project can use a different PostgreSQL volume, even when the container names look familiar.
+
 ## Run API and web on the host instead
 
 Prerequisites: **Python 3.13**, **Node.js**, and **Docker Compose**. Use this route when editing the app outside containers.
