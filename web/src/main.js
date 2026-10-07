@@ -370,7 +370,7 @@ async function renderPricing() {
       await api('/v1/system/beta-interest', { method: 'POST', body: JSON.stringify({ email, note, source: 'pricing_page' }) });
       document.querySelector('#beta-interest-feedback').innerHTML = '<div class="notice">Beta interest recorded. We will contact you with onboarding details.</div>';
     } catch (error) {
-      document.querySelector('#beta-interest-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+      document.querySelector('#beta-interest-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
     }
   });
 }
@@ -474,7 +474,7 @@ async function renderBilling() {
       await api('/billing/start-trial', { method: 'POST' });
       await renderBilling();
     } catch (error) {
-      document.querySelector('#billing-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+      document.querySelector('#billing-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
     }
   });
   document.querySelector('#billing-upgrade')?.addEventListener('click', async () => {
@@ -482,7 +482,7 @@ async function renderBilling() {
       await api('/billing/upgrade', { method: 'POST' });
       await renderBilling();
     } catch (error) {
-      document.querySelector('#billing-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+      document.querySelector('#billing-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
     }
   });
   document.querySelector('#billing-cancel')?.addEventListener('click', async () => {
@@ -491,7 +491,7 @@ async function renderBilling() {
       await api('/billing/cancel', { method: 'POST', body: JSON.stringify({ reason }) });
       await renderBilling();
     } catch (error) {
-      document.querySelector('#billing-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+      document.querySelector('#billing-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
     }
   });
 }
@@ -534,7 +534,7 @@ function renderLogin(message = '') {
       await api('/auth/request-magic-link', { method: 'POST', body: JSON.stringify({ email }) });
       renderLogin('Magic link requested. Check the development outbox file, then paste the token below or open the delivered URL.');
     } catch (error) {
-      renderLogin(`<span class="error">${error.message}</span>`);
+      renderLogin(`<span class="error">${errorText(error)}</span>`);
     }
   });
   document.querySelector('#verify-link').addEventListener('click', verifyManual);
@@ -549,7 +549,7 @@ async function verifyManual() {
     navigate('#/');
     await render();
   } catch (error) {
-    renderLogin(`<span class="error">${error.message}</span>`);
+    renderLogin(`<span class="error">${errorText(error)}</span>`);
   }
 }
 
@@ -565,10 +565,10 @@ function renderVerify() {
         <h1 style="margin:0">Verify sign-in link</h1>
         <div class="notice">The email and token below were taken from the delivered magic link. Press verify to create a session.</div>
         <label>Email
-          <input id="verify-email" type="email" value="${email}" />
+          <input id="verify-email" type="email" value="${escapeHtml(email)}" />
         </label>
         <label>Token
-          <input id="verify-token" type="text" value="${token}" />
+          <input id="verify-token" type="text" value="${escapeHtml(token)}" />
         </label>
         <div class="inline-actions">
           <button id="verify-link">Verify and sign in</button>
@@ -910,7 +910,7 @@ async function renderCases(path) {
         navigate(`#/item/${item.id}`);
         await render();
       } catch (error) {
-        app.insertAdjacentHTML('afterbegin', `<div class="error">${error.message}</div>`);
+        app.insertAdjacentHTML('afterbegin', `<div class="error">${errorText(error)}</div>`);
       }
     });
     for (const button of document.querySelectorAll('[data-clear-filter]')) {
@@ -943,7 +943,7 @@ async function renderCases(path) {
       button.addEventListener('click', () => navigate(`#/item/${button.dataset.openItem}`));
     }
   } catch (error) {
-    renderShell(`<div class="error">${error.message}</div>`);
+    renderShell(`<div class="error">${errorText(error)}</div>`);
   }
 }
 
@@ -996,7 +996,7 @@ async function renderDashboard() {
       </div>
     ` : '';
     renderShell(`
-      <div class="notice">Signed in as <strong>${me.email}</strong>. API base: <span class="mono">${API_BASE_URL}</span></div>
+      <div class="notice">Signed in as <strong>${escapeHtml(me.email)}</strong>. API base: <span class="mono">${escapeHtml(API_BASE_URL)}</span></div>
       ${trialNotice}
       ${freePlanNotice}
       ${activationCard}
@@ -1039,7 +1039,7 @@ async function renderDashboard() {
         navigate(`#/item/${item.id}`);
         await render();
       } catch (error) {
-        document.querySelector('#create-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+        document.querySelector('#create-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
       }
     };
     document.querySelector('#dashboard-open-billing')?.addEventListener('click', () => { navigate('#/billing'); render(); });
@@ -1067,7 +1067,7 @@ async function renderDashboard() {
         });
         await renderDashboard();
       } catch (error) {
-        document.querySelector('#create-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+        document.querySelector('#create-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
       }
     });
     for (const button of document.querySelectorAll('[data-open-item]')) {
@@ -1075,7 +1075,7 @@ async function renderDashboard() {
     }
   } catch (error) {
     clearAccessToken();
-    renderLogin(`<span class="error">${error.message}</span>`);
+    renderLogin(`<span class="error">${errorText(error)}</span>`);
   }
 }
 
@@ -1200,7 +1200,7 @@ async function renderItemDetail(itemId) {
             <div><strong>Type:</strong> ${item.type}</div>
             <div><strong>Due at:</strong> ${fmtDate(item.due_at)}</div>
             <div><strong>Amount:</strong> ${item.amount || '—'} ${item.currency || ''}</div>
-            <div><strong>Source URL:</strong> ${item.source_url ? `<a href="${item.source_url}" target="_blank">open</a>` : '—'}</div>
+            <div><strong>Source URL:</strong> ${renderSourceLink(item.source_url)}</div>
             <div><strong>Next action:</strong> ${escapeHtml(item.next_action || '—')}</div>
             ${outcomeReasonLabel(item) ? `<div><strong>${escapeHtml(outcomeReasonLabel(item))}</strong></div>` : ''}
             <div><strong>Note:</strong><br/>${escapeHtml(item.note || '—')}</div>
@@ -1265,13 +1265,13 @@ async function renderItemDetail(itemId) {
     }));
     document.querySelector('#back-dashboard').addEventListener('click', () => { navigate('#/'); render(); });
   } catch (error) {
-    renderShell(`<div class="error">${error.message}</div>`);
+    renderShell(`<div class="error">${errorText(error)}</div>`);
   }
 }
 
 function completeAction(fn) {
   fn().catch((error) => {
-    document.querySelector('#detail-feedback').innerHTML = `<div class="error">${error.message}</div>`;
+    document.querySelector('#detail-feedback').innerHTML = `<div class="error">${errorText(error)}</div>`;
   });
 }
 
@@ -1286,6 +1286,21 @@ function outcomeAction(itemId, outcome) {
   });
 }
 
+
+function errorText(error) {
+  return escapeHtml(error instanceof Error ? error.message : String(error));
+}
+
+function renderSourceLink(value) {
+  if (!value) return '—';
+  try {
+    const url = new URL(value);
+    if (!['http:', 'https:'].includes(url.protocol)) return '—';
+    return `<a href="${escapeHtml(url.href)}" target="_blank" rel="noopener noreferrer">open</a>`;
+  } catch {
+    return '—';
+  }
+}
 
 function escapeHtml(value) {
   return String(value)

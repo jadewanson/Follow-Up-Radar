@@ -4,6 +4,7 @@ import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from uuid import UUID
 
 TEST_DB_FILE = Path(tempfile.gettempdir()) / "followup_radar_test.sqlite3"
 TEST_OUTBOX_FILE = Path(tempfile.gettempdir()) / "followup_radar_test_outbox.jsonl"
@@ -28,6 +29,7 @@ from app.db.session import SessionLocal, engine
 from app.main import app
 from app.models.auth_token import MagicLinkToken
 from app.models.beta_interest_request import BetaInterestRequest
+from app.models.reminder import Reminder
 
 
 def _reset_db() -> None:
@@ -98,6 +100,12 @@ def test_terminal_reasons_required_and_case_can_reopen() -> None:
     assert reopen.status_code == 200, reopen.text
     assert reopen.json()["status"] == "open"
     assert reopen.json()["next_action"] is None
+
+    with SessionLocal() as db:
+        reminders = db.execute(
+            select(Reminder).where(Reminder.item_id == UUID(item_id)).order_by(Reminder.created_at.asc())
+        ).scalars().all()
+        assert [reminder.status for reminder in reminders] == ["canceled", "pending"]
 
     events = client.get(f"/items/{item_id}/events", headers={"Authorization": f"Bearer {token}"})
     assert events.status_code == 200, events.text

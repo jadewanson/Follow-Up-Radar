@@ -12,7 +12,7 @@ from app.models.user import User
 from app.services.event_service import event_service
 from app.services.item_service import item_service
 from app.services.notification_delivery_service import EmailMessage, notification_delivery_service
-from app.utils.datetime import utcnow
+from app.utils.datetime import coerce_utc, utcnow
 
 
 class DailyDigestService:
@@ -31,7 +31,7 @@ class DailyDigestService:
         sorted_items = sorted(items, key=lambda item: item.due_at)
         for item in sorted_items:
             lines.append(
-                f"- [{item.status}] {item.client_name} — {item.title} — due {item.due_at.astimezone().strftime('%Y-%m-%d %H:%M %Z')}"
+                f"- [{item.status}] {item.client_name} — {item.title} — due {coerce_utc(item.due_at).strftime('%Y-%m-%d %H:%M UTC')}"
             )
         lines.append("")
         lines.append(f"Open dashboard: {self.settings.app_base_url.rstrip('/')}/#/")
