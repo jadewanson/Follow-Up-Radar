@@ -94,3 +94,13 @@ The suite must cover:
 - reopen plus reminder re-arming;
 - forbidden terminal mutations;
 - archive behavior.
+
+## 7. Approved future case-planning metadata — not implemented
+
+[Issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) introduces planned fields `desired_outcome` and `expected_close_date`. They are *descriptive target metadata*, not new lifecycle states or triggers:
+- Neither field changes `status`, `payment_status`, `due_at`, `completed_at` or reminder scheduling by itself.
+- Passing `expected_close_date` does not automatically close, mark lost, or archive the case.
+- Explicit closure with `done`/`lost` and a non-empty actual reason remains required.
+- Both targets survive closure as planned intent, distinct from actual outcome.
+
+These requirements apply **when implemented**, not to the present build. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

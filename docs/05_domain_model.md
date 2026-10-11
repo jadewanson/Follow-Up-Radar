@@ -78,6 +78,13 @@ Fields:
 - `completed_at`
 - `archived_at`
 
+### Approved FollowUpItem extension — planned, NOT present in iteration-14 model
+
+- `desired_outcome`: optional user-authored text describing the intended business result.
+- `expected_close_date`: optional **date-only** value for the user's expected case closure day (not a reminder timestamp).
+
+These are **planned fields**, excluded from the current persisted field list above until [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) is implemented. They are distinct from `next_action`, `due_at`, `completed_at`, `done_reason` and `lost_reason`. See [implementation specification](34_planned_case_desired_outcome_and_expected_close_date.md). Until then existing code/schema remain unchanged and are not in conflict with this *future* extension.
+
 ### Reminder
 Scheduled delivery intent for one case.
 

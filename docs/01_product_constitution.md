@@ -16,6 +16,10 @@ A user sends an invoice, proposal, or promised reply, receives no response, save
 ## Core loop
 Capture → Schedule → Remind → Act → Close
 
+## Approved product addition — not yet implemented
+
+A user should be able to record the **desired outcome** of a follow-up case and the **expected date of closing** that case. These differ from the immediate next action, reminder due date and actual completion. Approved product requirement, implementation pending in [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6). See [`34_planned_case_desired_outcome_and_expected_close_date.md`](34_planned_case_desired_outcome_and_expected_close_date.md); do not treat this as an existing feature.
+
 ## Activation
 A user creates at least one follow-up item, receives a reminder, returns from that reminder, and closes or reschedules the case.
 

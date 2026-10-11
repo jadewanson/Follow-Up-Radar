@@ -28,3 +28,4 @@ If code and docs conflict, code is wrong unless the relevant authoritative doc h
 
 - `26_iteration_07_cases_search_sort_filters.md` — cases search, sort, and filters
 - `27_iteration_08_next_action_and_outcome_reasons.md` — next action and outcome reasons
+- `34_planned_case_desired_outcome_and_expected_close_date.md` — approved addition **pending implementation** ([issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6)); not a current executable contract

@@ -102,3 +102,14 @@ Moves the internal beta subscription to active Pro. This is not a real payment c
 Cancels the internal beta subscription with a required reason.
 
 Real payment-provider checkout/webhook semantics are intentionally outside the current implemented contract and remain a separate backlog decision.
+
+## 6. Approved future case contract extension — NOT available in current API
+
+Tracked by [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6). After implementation only:
+- `POST /items` accepts optional `desired_outcome: string | null` and `expected_close_date: YYYY-MM-DD | null`.
+- `PATCH /items/{id}` can change or clear either field for a mutable case; omitting the field leaves it unchanged.
+- `GET /items`, `GET /items/{id}`, board and registry representations expose both as nullable fields.
+- These fields do not alter `due_at` scheduling, completion, reminder, payment or lifecycle contracts.
+- Existing API clients omitting both fields continue to work.
+
+This section is the **approved future contract**, not executable iteration-14 behaviour. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

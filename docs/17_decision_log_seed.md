@@ -42,6 +42,15 @@ must be recorded here.
 **Reason:** without reminder-return-close the product has no differentiating value.  
 **Impact:** reliability and idempotency work are P0.
 
+## ADR-005 — Record intended case outcome and expected closure date
+**Decision:** Add two user-entered case planning fields: `desired_outcome` and `expected_close_date`. Keep them independent of next-action reminders, actual completion, lifecycle and payment statuses.
+**Status:** accepted product requirement; implementation pending ([issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6)).
+**Reason:** The existing case captures the next contact but not explicitly the result the user aims to achieve or the anticipated case-end date.
+**Alternatives considered:** store the goal in `note`/`title` and reuse `due_at` for the end date. Rejected because these have different meanings.
+**Impact:** create/edit/detail UI, API create/update/read schemas, domain model, PostgreSQL migration, tests and docs. Existing records must remain valid.
+**Migration / rollback note:** add nullable columns via additive Alembic migration; do not auto-populate business targets for old rows. Do not implement automatic closure or alter reminder scheduling.
+**Scope:** [planned field specification](34_planned_case_desired_outcome_and_expected_close_date.md).
+
 ## Template for future entries
 ### ADR-XXX — Title
 - **Decision:**

@@ -85,3 +85,11 @@ For reminder and digest deliveries, `body_text` is a retry payload. Magic-link d
 ## 5. Migration gate
 
 A release candidate must prove from an empty PostgreSQL database that `alembic upgrade head` succeeds. A model-only `Base.metadata.create_all()` test is not a substitute for this gate.
+
+## 6. Approved future schema addition — NOT migrated yet
+
+[Issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) tracks a future Alembic migration for `followup_items`:
+- `desired_outcome`: nullable `TEXT`.
+- `expected_close_date`: nullable SQL `DATE` (not `TIMESTAMP`).
+
+Nullability preserves existing cases. Do not add defaults that fabricate users' targets, or derive these from `due_at`, `completed_at`, or outcome reasons. Current Alembic head and ORM **do not contain these fields**. Validate upgrade of an existing PostgreSQL database, not only a fresh create. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

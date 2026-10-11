@@ -81,3 +81,9 @@ Do not add:
 
 ## 5. Completion condition
 v1 is complete when the authoritative core loop works, not when the backlog is aesthetically “full”.
+
+## 6. Approved product addition after iteration 14 — TO IMPLEMENT
+
+**Case desired outcome and expected close date** are approved, but absent from the current snapshot. [Issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) tracks implementation of the case create/edit surfaces, persisted fields, API contracts, migration and tests. Do not mark implemented before code and verification evidence exist.
+
+Specification: [`34_planned_case_desired_outcome_and_expected_close_date.md`](34_planned_case_desired_outcome_and_expected_close_date.md). This addition does not supersede historical build order above.

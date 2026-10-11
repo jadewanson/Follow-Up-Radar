@@ -77,3 +77,13 @@ A new user must be able to:
 - understand product in under 30 seconds;
 - create first item in under 2–3 minutes;
 - understand what happens next without documentation.
+
+## 10. Approved future flow extension — not yet implemented
+
+When creating a case in the web app, the user may additionally enter:
+- **Desired outcome:** what business result they intend to achieve.
+- **Expected close date:** the calendar day by which they hope to resolve the case.
+
+On an active case, the user can review and update these values. Item detail distinguishes **next action**, **next follow-up/reminder due date**, **expected close date**, and **actual completion**. A closing action still records `done` or `lost` with an actual outcome reason; the target does not automatically determine closure.
+
+These fields are **planned, not available in the current UI**. See [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) and [specification](34_planned_case_desired_outcome_and_expected_close_date.md).
