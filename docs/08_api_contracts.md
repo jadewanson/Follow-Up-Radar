@@ -113,3 +113,7 @@ Tracked by [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6). A
 - Existing API clients omitting both fields continue to work.
 
 This section is the **approved future contract**, not executable iteration-14 behaviour. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).
+
+## 7. Future completion comparison contract — NOT in current API
+
+For [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6), extend `POST /items/{id}/complete` input with optional `outcome_assessment: "exceeded" | "met" | "below" | null`, alongside existing required `outcome` and `reason`. Only permit non-null values where `desired_outcome` exists. Read/registry responses expose nullable `outcome_assessment`. Omitting it maintains backward compatibility. On reopening, current assessment becomes null while a closure event preserves assessment and desired-outcome snapshot. No automatic goal calculation. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

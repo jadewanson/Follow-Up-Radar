@@ -59,3 +59,9 @@ must be recorded here.
 - **Alternatives considered:**
 - **Impact:**
 - **Migration / rollback note:**
+
+### ADR-005 extension — subjectively compare expected and actual result (2026-10-12)
+**Decision:** Add a planned optional `outcome_assessment` at explicit closure, selected as one of `exceeded`, `met`, `below`, or omitted (`null`). Display the saved desired outcome alongside the required actual closure reason. Preserve the comparison as separate from `done`/`lost`; never calculate it automatically. On reopen clear current assessment while retaining the closure event with a snapshot of the desired outcome.
+**Status:** accepted product requirement, **implementation pending**, within [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6).
+**Reason:** capture how well the case met its original business goal, not merely why the case was marked done or lost.
+**Impact:** completion dialog, completion API, persisted case metadata, migration, event history and regression tests. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

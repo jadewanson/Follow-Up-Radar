@@ -70,3 +70,41 @@ The current Chrome extension only captures the active tab's title/URL and is **n
 No automatic "goal achieved" evaluation, automatic closure, deadline escalation, extra notifications, CRM pipeline, task-management workflow engine or new billing behaviour.
 
 **Do not change this document's status to implemented until code, migration and verification evidence exist.**
+
+## 6. Expected versus actual outcome assessment — approved extension, NOT implemented
+
+**Purpose:** when the user closes a case, let them record a subjective comparison between the previously entered `desired_outcome` and what actually happened. This is a **single-choice control (radio buttons)**, not a boolean checkbox.
+
+### Closure dialog (proposed UI)
+Show the current desired outcome read-only, if one was specified:
+- **Desired outcome:** "Sign a $5,000 contract".
+- **Actual result / closure reason:** [required free-text field; existing `done_reason` / `lost_reason` semantics].
+- **Result compared with expectations:** select one:
+  - **Exceeded expectations** — `exceeded`
+  - **Met expectations** — `met`
+  - **Below expectations** — `below`
+
+The user still chooses the actual lifecycle outcome (`done` or `lost`) and confirms closure. The comparison is **self-reported**; software must never infer it from amounts, dates, words in the reason, or lifecycle status.
+
+### Data, API, and consistency
+- Proposed persisted field: `outcome_assessment`, nullable enum/string constrained to `exceeded`, `met`, `below` (and `null` for not assessed).
+- The comparison selector is presented in the close dialog **only if `desired_outcome` is present**. If no desired outcome exists, retain the existing closure flow without it.
+- The comparison is **optional** even when a desired outcome exists, to avoid forcing a misleading judgment or breaking existing clients. A missing answer stores `null`; never invent a default.
+- Extend `POST /items/{id}/complete` with optional `outcome_assessment` and expose the stored value in case read/registry/board where appropriate. Do not accept a non-null assessment when no desired outcome was recorded.
+- Validate enum values on the server; persist assessment, terminal lifecycle status, actual reason, and history/event **atomically**.
+- On close, append an event containing the chosen comparison and a **snapshot of the desired outcome at closure**, so later edits after reopening cannot rewrite the historical meaning.
+- On reopening, clear the **current** `outcome_assessment` because the old closure is no longer the current result; keep the historical event. Retain `desired_outcome` and `expected_close_date` as previously specified.
+- Archive preserves recorded assessment; archival alone does not imply an outcome assessment.
+- `done` / `lost` and `exceeded` / `met` / `below` are **independent dimensions**. Do not infer one from the other or silently override the user's choice. The actual reason remains mandatory and separate.
+
+### Acceptance criteria — all PENDING
+- [ ] Closing a case with a desired outcome shows the desired outcome, actual reason, and three mutually exclusive comparison choices.
+- [ ] Closing a case without a desired outcome does not demand or invent a comparison.
+- [ ] Each comparison choice and `null` round-trip in the completion response and subsequent case reads; invalid values fail validation.
+- [ ] Existing clients can still close with only `outcome` and `reason`.
+- [ ] Any supplied non-null comparison without a desired outcome is rejected without partial mutation.
+- [ ] Reopening clears the current assessment but keeps the historical closing event/snapshot; new closure can carry a new assessment.
+- [ ] Assessment does not change payment, reminder or lifecycle rules and never automatically closes a case.
+- [ ] API, PostgreSQL migration, domain model, web UI, events and tests are all implemented before this requirement can be marked complete.
+
+This extends [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6); **no feature code has been implemented**.

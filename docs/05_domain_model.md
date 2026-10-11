@@ -169,3 +169,10 @@ Fields:
 ## 3. Authority rule
 
 When this document, an iteration note, and executable code disagree, treat the mismatch as a defect. Current models, contracts, migrations, tests, and this document must converge on the same semantics before a release gate can pass.
+
+### Planned completion assessment (NOT current iteration-14 model)
+
+- `outcome_assessment`: nullable, user-selected comparison (`exceeded`, `met`, `below`) at explicit `done`/`lost` closure, meaningful only when `desired_outcome` exists.
+- Not a lifecycle state, payment status, or substitute for `done_reason` / `lost_reason`.
+- Historical completion events must capture assessment and the desired-outcome text as it existed at that closure; reopening clears the current assessment but preserves event history.
+- Requires new migration, API/domain work and UI; tracked in [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6). See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

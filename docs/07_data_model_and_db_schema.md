@@ -93,3 +93,7 @@ A release candidate must prove from an empty PostgreSQL database that `alembic u
 - `expected_close_date`: nullable SQL `DATE` (not `TIMESTAMP`).
 
 Nullability preserves existing cases. Do not add defaults that fabricate users' targets, or derive these from `due_at`, `completed_at`, or outcome reasons. Current Alembic head and ORM **do not contain these fields**. Validate upgrade of an existing PostgreSQL database, not only a fresh create. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).
+
+## 7. Future outcome assessment storage — NOT migrated yet
+
+Extend [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) with nullable `followup_items.outcome_assessment`, constrained to `exceeded`, `met`, `below` (or `NULL`). Never populate it automatically from `status`, `done_reason`, `lost_reason` or money amounts. Add an append-only closure event with assessment and a snapshot of `desired_outcome` at closing. Keep nullable for existing records and old clients; on reopen clear current value but preserve the historical event. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).

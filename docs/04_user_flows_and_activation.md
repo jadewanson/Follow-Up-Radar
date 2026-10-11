@@ -87,3 +87,7 @@ When creating a case in the web app, the user may additionally enter:
 On an active case, the user can review and update these values. Item detail distinguishes **next action**, **next follow-up/reminder due date**, **expected close date**, and **actual completion**. A closing action still records `done` or `lost` with an actual outcome reason; the target does not automatically determine closure.
 
 These fields are **planned, not available in the current UI**. See [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) and [specification](34_planned_case_desired_outcome_and_expected_close_date.md).
+
+## 11. Future closure UX — compare expectation with actual result (not implemented)
+
+When closing a case **with a saved desired outcome**, the dialog presents the desired outcome, required actual outcome reason, and a **single-choice** assessment: Exceeded expectations / Met expectations / Below expectations. It may be left unanswered; the existing `done`/`lost` transition still requires an actual reason. Without a desired outcome no comparison is requested. No automatic comparison is performed. See [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6) and [specification](34_planned_case_desired_outcome_and_expected_close_date.md).

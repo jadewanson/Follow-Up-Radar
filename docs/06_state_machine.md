@@ -104,3 +104,7 @@ The suite must cover:
 - Both targets survive closure as planned intent, distinct from actual outcome.
 
 These requirements apply **when implemented**, not to the present build. See [planned specification](34_planned_case_desired_outcome_and_expected_close_date.md).
+
+## 8. Future expectation assessment at closure — not implemented
+
+After the planned `desired_outcome` addition, explicit `done` or `lost` completion **may** include a user-selected `outcome_assessment` (`exceeded`, `met`, `below`), or `null` if not assessed. A comparison requires an existing desired outcome, but is never required to close; the actual non-empty closure reason is still mandatory. This assessment must not change lifecycle/payment/reminder transitions. An assessment is cleared from current case state on reopen but preserved in the historical closure event with a snapshot of the goal. See [issue #6](https://github.com/jadewanson/Follow-Up-Radar/issues/6).
