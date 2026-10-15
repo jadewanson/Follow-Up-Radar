@@ -1,7 +1,7 @@
 # 17. Decision Log Seed
 
 - **Owner role:** Product Owner + Architect
-- **Тип истины:** change history
+- **Type of truth:** change history
 - **Gate:** all changes to constitutions/contracts
 
 ## Usage
