@@ -1,7 +1,7 @@
 # 09. Repository Structure and Module Ownership
 
 - **Owner role:** Architect + Tech Lead
-- **Тип истины:** codebase topology
+- **Type of truth:** codebase topology
 - **Gate:** G2 / G4 / G5
 
 ## 1. Canonical repository layout
