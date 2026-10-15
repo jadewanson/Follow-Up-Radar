@@ -1,7 +1,7 @@
 # 11. Testing Strategy and Quality Gates
 
 - **Owner role:** QA Lead + Tech Lead
-- **Тип истины:** quality proof
+- **Type of truth:** quality proof
 - **Gate:** G10 / release
 
 ## 1. Test philosophy
