@@ -1,7 +1,7 @@
 # 04. User Flows and Activation
 
 - **Owner role:** Product Owner + UX owner
-- **Тип истины:** пользовательские потоки
+- **Type of truth:** user flows
 - **Gate:** G0 / G3 / G7 / G12
 
 ## 1. Primary flow
