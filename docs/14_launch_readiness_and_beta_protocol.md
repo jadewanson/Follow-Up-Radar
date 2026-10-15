@@ -1,7 +1,7 @@
 # 14. Launch Readiness and Beta Protocol
 
 - **Owner role:** Product Owner + Delivery + SRE
-- **Тип истины:** launch discipline
+- **Type of truth:** launch discipline
 - **Gate:** G11 / G12 / G13
 
 ## 1. Beta goal
