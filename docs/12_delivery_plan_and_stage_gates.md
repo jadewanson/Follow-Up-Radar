@@ -1,7 +1,7 @@
 # 12. Delivery Plan and Stage Gates
 
 - **Owner role:** Delivery Manager
-- **Тип истины:** execution sequence
+- **Type of truth:** execution sequence
 - **Gate:** all
 
 ## 1. Phases
