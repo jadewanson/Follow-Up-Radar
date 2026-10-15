@@ -1,7 +1,7 @@
 # 15. Handoff Package and Acceptance
 
 - **Owner role:** Delivery Manager + Architect
-- **Тип истины:** transfer completeness
+- **Type of truth:** transfer completeness
 - **Gate:** G14
 
 ## 1. Handoff principle
