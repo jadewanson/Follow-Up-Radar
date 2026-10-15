@@ -1,7 +1,7 @@
 # 16. v1 Backlog and Implementation Order
 
 - **Owner role:** Delivery + Tech Lead
-- **Тип истины:** execution backlog
+- **Type of truth:** execution backlog
 - **Gate:** execution planning
 
 ## 1. Sequence law
