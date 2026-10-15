@@ -1,7 +1,7 @@
 # 10. Coding Standards and Review Law
 
 - **Owner role:** Tech Lead
-- **Тип истины:** implementation discipline
+- **Type of truth:** implementation discipline
 - **Gate:** applies to every PR
 
 ## 1. Code standards
